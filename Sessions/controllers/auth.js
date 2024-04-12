@@ -1,7 +1,20 @@
-const login = (req, res) => {
-  const { email, password } = req;
+import loginAuth from "../service/serviceAuth.js";
 
-  //check if credentials are correct
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  // perform payload authentication
+  if (!email || !password) {
+    return res.status(400).json("email and password are required");
+  }
+
+  try {
+    const user = await loginAuth(email, password);
+    req.session.user = user;
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+  }
 
   //assume credentials are correct
   req.session.clientId = "abc123";

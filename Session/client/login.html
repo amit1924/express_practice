@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+   <h1>Login</h1>
+   <form id="form">
+    <input id="input" type="text" placeholder="Enter username"> <!-- Corrected the id here -->
+    <input type="submit" value="submit">
+   </form> 
+
+   <script>
+    const input = document.getElementById("input"); // Corrected the id here
+    const form = document.getElementById("form");
+
+    const handleSubmit = async (e) => { // Corrected to use 'e' instead of 'event'
+        e.preventDefault(); // Prevent default form submission
+
+        const username = input.value;
+        
+        try {
+            const res = await fetch("http://127.0.0.1:3000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", // Corrected the header name
+                },
+                body: JSON.stringify({ username })
+            });
+
+            if (res.ok) {
+                console.log("Successfully logged in");
+                window.location.href = "http://127.0.0.1:3000/dashboard";
+            } else {
+               alert("Error logging in");
+            }
+        } catch (e) {
+            console.log(`Error logging in: ${e.message}`);
+        }
+    }
+
+    form.addEventListener("submit", handleSubmit);
+   </script>
+</body>
+</html>

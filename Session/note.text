@@ -1,0 +1,8 @@
+ resave:By default, the resave option is set to true. This means that the session data will be saved to the session store on every request, even if the session data hasn't changed during that request.
+ Setting resave to false means that the session data will only be saved to the session store if it has been modified during the request. This can improve performance and reduce unnecessary writes to the session store.
+
+ saveUninitialized:
+
+ By default, the saveUninitialized option is set to true. This means that a session will be created for the user on the server-side, even if the session data is empty (i.e., uninitialized).
+ Setting saveUninitialized to false means that a session will not be created for the user until some data is stored in the session. This can help reduce storage space and server resources by avoiding the creation of unnecessary session objects for users who may not actually need them.
+

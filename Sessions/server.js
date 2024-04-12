@@ -4,6 +4,7 @@ import { sessionMiddleware } from "./middleware/session.js";
 import { router } from "./routes/index.js";
 
 const app = express();
+app.use(express.json());
 
 //2.configure session middleware
 app.use(sessionMiddleware);
