@@ -22,6 +22,7 @@ app.post("/login", (req, res) => {
     httpOnly: true,
   };
   res.cookie("username", username, cookieOptions);
+  res.sendStatus(200).json({ message: "cookie set" });
 });
 
 app.listen(5000, () => {

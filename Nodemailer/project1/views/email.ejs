@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nodemailer</title>
+</head>
+<body>
+    <h1>Nodemailer app</h1>
+    <div style="display: flex; justify-content:center; font-size:large; padding:50px">
+        
+        <form action="/send-email" method="post" style="font-size:large; padding:50px">
+            <input type="email" name="email" placeholder="Enter recipient email" required style="font-size:30px"/><br /><br /><br />
+
+            <textarea name="message" rows="5" placeholder="Enter your message" required style="font-size:30px"></textarea><br /><br /><br />
+            <button type="submit" style="padding: 15px;">Send Email</button>
+        </form>
+       
+        
+    
+          
+    </div>
+    <% if (typeof status !== 'undefined' && status && typeof message !==
+    'undefined' && message) { %>
+    <div class="status-message <%= status %>"><%= message %></div>
+    <% } %>
+   
+</body>
+</html>
