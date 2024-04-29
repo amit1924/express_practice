@@ -38,17 +38,18 @@ app.post("/users", (req, res) => {
 
       const { id, name, email, password } = req.body;
 
-      // Alternatively, you can directly assign values to the properties
       const newUser = {};
       newUser.id = id;
       newUser.name = name;
       newUser.email = email;
       newUser.password = password;
 
+      //Or Another Method
+      // Create a new user object
+      //  const newUser = { id, name, email, password };
+
       // Add the new user to the existing users array
       users.push(newUser);
-
-      newUser.email = email;
 
       // Write the updated data back to the file
       fs.writeFile(filePath, JSON.stringify(users, null, 2), (err) => {
