@@ -6,9 +6,14 @@ import fileSizeLimiter from "./middleware/fileSizeLimiter.js";
 import fileExtLimiter from "./middleware/fileExtLimiter.js";
 
 const BASE_DIR = path.resolve();
+console.log(`BASE_DIR`, BASE_DIR); //C:\Users\cours\Desktop\AllBackend\Express\Upload
 
 const app = express();
 const PORT = 3000;
+
+// Serve uploaded images statically
+
+app.use("/uploads", express.static(path.join(BASE_DIR, "uploads")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(BASE_DIR, "index.html"));
@@ -23,10 +28,26 @@ app.post(
 
   (req, res) => {
     const files = req.files;
-    console.log(files);
+
+    const imagefile = files && files.image;
+
+    if (!imagefile) {
+      return res.status(400).json({ message: "Image file not found" });
+    }
+    const uploadPath = path.join(BASE_DIR, "uploads", imagefile.name);
+    console.log(`uploading ${uploadPath}`); // C:\Users\cours\Desktop\AllBackend\Express\Upload\uploads\adaptive.jpeg
+    imagefile.mv(uploadPath, (err) => {
+      if (err) {
+        console.error("Error saving file: " + err.message);
+      }
+    });
+    // Image Path
+    const uploadedImage = `/uploads/${imagefile.name}`;
+
     return res.json({
       status: "logged",
       message: "uploaded files successfully",
+      imagePath: uploadedImage, // Send the image path back to the client
     });
   }
 );

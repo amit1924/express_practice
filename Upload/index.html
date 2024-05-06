@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Uploader</title>
+    <title>Node.js File Uploader</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,54 +42,64 @@
         button:hover {
             background-color: #0056b3;
         }
-        
+
+        #image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 400px;
+        }
     </style>
 </head>
 <body>
-    <h1>Node js File Uploader</h1>
+    <h1>Node.js File Uploader</h1>
     <form id="uploadForm" enctype="multipart/form-data">
         <input type="file" id="myFiles" accept="image/*" multiple /> 
-        <button>Submit</button>
+        <button type="submit">Submit</button>
     </form>
-    <h2></h2>
-   <h3></h3>
-   <script>
-const form = document.getElementById("uploadForm");
+    <div id="image-container">
+        <h2></h2>
+        <h3></h3>
+        <img id="uploadedImage" src="" alt="Uploaded Image">
+    </div>
+    <script>
+        const form = document.getElementById("uploadForm");
 
-const sendFiles =async () =>{
-    //Get an Object
-    const myFiles =document.getElementById("myFiles")
-    const files =myFiles.files;
- 
+        const sendFiles = async () => {
+            const myFiles = document.getElementById("myFiles");
+            const files = myFiles.files;
+            const formData = new FormData();
 
-    const formData =new FormData()
+            for (const file of files) {
+                formData.append("image", file);
+            }
 
-    for (const file of files) {
-      
-        formData.append(file.name, file);
-    }
-    
+            const response = await fetch("http://localhost:3000/upload", {
+                method: "POST",
+                body: formData
+            });
 
-    const response =await fetch("http://localhost:3000/upload",{
-        method: "POST",
-        body:formData
-    })
-    console.log(response);
-    const data =await response.json();
-    console.log(data);
+            const data = await response.json();
+           
 
-    const h2 =document.querySelector("h2");
-    h2.textContent =`Status:${data?.status}`;
+            const h2 = document.querySelector("h2");
+            h2.textContent = `Status: ${data?.status}`;
 
-    const h3= document.querySelector("h3");
-    h3.textContent =data?.message
-   
-}
+            const h3 = document.querySelector("h3");
+            h3.textContent = data?.message;
 
-form.addEventListener("submit",(e) =>{
-  e.preventDefault();
-  sendFiles()
-});
-   </script>
+            const uploadedImage = document.getElementById("uploadedImage");
+            uploadedImage.src = data?.imagePath;
+           
+        };
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            sendFiles();
+        });
+    </script>
 </body>
 </html>
