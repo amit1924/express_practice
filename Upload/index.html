@@ -51,6 +51,7 @@
         img {
             max-width: 100%;
             max-height: 400px;
+            margin-bottom: 10px; /* Add margin between images */
         }
     </style>
 </head>
@@ -61,9 +62,7 @@
         <button type="submit">Submit</button>
     </form>
     <div id="image-container">
-        <h2></h2>
-        <h3></h3>
-        <img id="uploadedImage" src="" alt="Uploaded Image">
+        <!-- Images will be dynamically added here -->
     </div>
     <script>
         const form = document.getElementById("uploadForm");
@@ -83,23 +82,42 @@
             });
 
             const data = await response.json();
-           
-
             const h2 = document.querySelector("h2");
             h2.textContent = `Status: ${data?.status}`;
 
             const h3 = document.querySelector("h3");
             h3.textContent = data?.message;
 
-            const uploadedImage = document.getElementById("uploadedImage");
-            uploadedImage.src = data?.imagePath;
-           
+            // After uploading new images, fetch and display all images
+            displayImages();
+        };
+
+        const displayImages = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/images");
+                const imagePaths = await response.json();
+                
+                const imageContainer = document.getElementById("image-container");
+                imageContainer.innerHTML = ""; // Clear previous images
+
+                imagePaths.forEach((imagePath) => {
+                    const img = document.createElement("img");
+                    img.src = imagePath;
+                    img.alt = "Uploaded Image";
+                    imageContainer.appendChild(img);
+                });
+            } catch (error) {
+                console.error("Error fetching images:", error.message);
+            }
         };
 
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             sendFiles();
         });
+
+        // Initial display of images when the page loads
+        displayImages();
     </script>
 </body>
 </html>

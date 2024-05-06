@@ -4,6 +4,7 @@ import path from "path";
 import filesExists from "./middleware/filesPayloadExist.js";
 import fileSizeLimiter from "./middleware/fileSizeLimiter.js";
 import fileExtLimiter from "./middleware/fileExtLimiter.js";
+import fs from "fs";
 
 const BASE_DIR = path.resolve();
 console.log(`BASE_DIR`, BASE_DIR); //C:\Users\cours\Desktop\AllBackend\Express\Upload
@@ -51,6 +52,26 @@ app.post(
     });
   }
 );
+
+app.get("/images", (req, res) => {
+  const uploadDir = path.join(BASE_DIR, "uploads");
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      console.error("Error reading directory: " + err.message);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    const imagePaths = files
+      .filter((file) => {
+        return /\.(png|jpg|jpeg)$/i.test(file);
+      })
+      .map((file) => {
+        return `/uploads/${file}`;
+      });
+
+    return res.json(imagePaths);
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
