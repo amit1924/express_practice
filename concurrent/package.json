@@ -1,0 +1,19 @@
+{
+  "name": "concurrent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run dev:frontend\" \"npm run start:backend\"",
+    "dev:frontend": "cd frontend/my-app && npm run dev", 
+    "start:backend": "cd backend && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2" 
+  }
+}
+
+
