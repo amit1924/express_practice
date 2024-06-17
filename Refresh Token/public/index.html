@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Refresh Token</title>
+  </head>
+  <body>
+    <div>
+      <input type="text" id="username" placeholder="username" /><br /><br />
+      <input type="password" id="password" placeholder="password" /><br /><br />
+      <button id="login">Login</button>
+    </div>
+    <br /><br />
+    <div>
+      <button id="checkProfile">Check Profile</button>
+    </div>
+    <div>
+      <button id="logout">Logout</button>
+    </div>
+
+    <script>
+      const loginButton = document.getElementById("login");
+      const checkProfileButton = document.getElementById("checkProfile");
+      const logoutButton = document.getElementById("logout");
+
+      loginButton.addEventListener("click", async () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const response = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>
+        <p>Access token:${data.accessToken}</p>
+        <p>Refresh token:${data.refreshToken}</p>
+        </h3>`;
+        document.body.appendChild(div);
+      });
+
+      checkProfileButton.addEventListener("click", async () => {
+        let accessToken = localStorage.getItem("accessToken");
+
+        let response = await fetch("/protected", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (response.status === 200) {
+          console.log("Now you can accesse this protected page");
+        } else {
+          alert("You have no access token to access this page");
+        }
+
+        if (response.status === 403) {
+          // Access token expired, get a new one now
+          const refreshToken = localStorage.getItem("refreshToken");
+
+          const tokenResponse = await fetch("/token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: refreshToken }),
+          });
+
+          const tokenData = await tokenResponse.json();
+          accessToken = tokenData.accessToken;
+          console.log("Access token: " + accessToken);
+
+          localStorage.setItem("accessToken", accessToken);
+
+          // Retry the original request with the new access token
+          response = await fetch("/protected", {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+        }
+
+        const data = await response.text();
+      });
+
+      logoutButton.addEventListener("click", async () => {
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        if (!refreshToken) {
+          console.log("No refreshToken found in localStorage");
+          return;
+        }
+
+        const response = await fetch("/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token: refreshToken }), // Send refreshToken in the body
+        });
+        console.log(response);
+
+        try {
+          const data = await response.json();
+          console.log(data);
+          alert(data.message);
+        } catch (error) {
+          console.error("Failed to parse JSON response:", error);
+        } finally {
+          // Clear tokens from localStorage regardless of response status
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetching Token</title>
+</head>
+<body style="width: 100%; height:100%">
+    <div style="display: flex; flex-direction:column; width:100%;height:100%; justify-content:center;align-items:center ;">
+       <label for="token">Session Token</label> <br><br>
+       <input type="text" id="token" placeholder="Set Your Token">
+       <br><br>
+       <button onclick="setSessionToken">SetToken</button>
+
+       <br><br>
+   
+  
+        <button onclick="checkProfile" id="btn">Check Profile</button>
+   
+    </div>
+
+    <script>
+const token =document.getElementById("token");
+const button =document.querySelector("button");
+const btn = document.querySelector("#btn")
+const div =document.querySelector("div")
+
+const setSessionToken =()=>{
+    const tokenValue = token.value
+   document.cookie=`sessionToken=${tokenValue}`; path="/";
+   
+    
+}
+
+
+
+button.addEventListener("click",setSessionToken)
+
+
+
+const fetchProfile =async ()=>{
+const res = await fetch('/profile',{
+    method: "GET",
+  
+})
+if(!res.ok){
+   console.log("failed to fetch profile");
+}
+const data =await res.json()
+const div =document.createElement("div")
+div.innerHTML=`<h1 style="color:red;text-align:center">${data.message}</h1>`
+
+document.body.appendChild(div)
+
+
+
+}
+
+const checkProfile = async ()=>{
+    
+    await fetchProfile();
+}
+
+btn.addEventListener('click',checkProfile)
+
+    </script>
+</body>
+</html>
+
+
+<!-- If you want the cookie to be accessible across the entire website (all pages and routes), you need to set path=/. -->
+
+<!-- With credentials: "include": Ensures cookies are always sent, useful for cross-origin requests or ensuring cookies are included in all requests, especially for authenticated sessions. -->
