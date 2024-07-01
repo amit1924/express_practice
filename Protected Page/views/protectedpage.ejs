@@ -1,245 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Professional E-commerce Layout</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <style>
-      body {
-        font-family: "Roboto", sans-serif;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professional E-commerce Layout</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    header {
+      background-color: #343a40;
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    nav ul li {
+      margin-left: 20px;
+    }
+
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .product {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .product img {
+      width: 100%;
+      height: auto;
+    }
+
+    .product-details {
+      padding: 15px;
+    }
+
+    .product-details h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .product-details p {
+      margin: 10px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .product-details .price {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e74c3c;
+    }
+
+    .product-details button {
+      background-color: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    footer {
+      background-color: #343a40;
+      color: #fff;
+      text-align: center;
+      padding: 7px;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+
+    @media (min-width:1080px){
+      footer{
+        margin-left: -162px;
+      }
+    }
+
+    @media (max-width: 600px) {
       header {
-        background-color: #343a40;
-        color: #fff;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 24px;
-       
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       nav ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       nav ul li {
-        margin-left: 20px;
-      }
-
-      nav ul li a {
-        color: #fff;
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      .container {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        position: relative;
-      }
-
-      .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-      }
-
-      .product {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        overflow: hidden;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-
-      .product img {
-        width: 100%;
-        height: auto;
-      }
-
-      .product-details {
-        padding: 15px;
-      }
-
-      .product-details h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 500;
-      }
-
-      .product-details p {
-        margin: 10px 0;
-        font-size: 14px;
-        color: #555;
-      }
-
-      .product-details .price {
-        font-size: 16px;
-        font-weight: 700;
-        color: #e74c3c;
-      }
-
-      .product-details button {
-        background-color: #e74c3c;
-        color: #fff;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
+        margin-left: 0;
         margin-top: 10px;
       }
-
-      footer {
-        background-color: #343a40;
-        color: #fff;
-        text-align: center;
-        padding: 7px;
-        position: fixed;
-        width: 100%;
-        bottom: 0;
-        
-      }
-      @media (min-width:1080px){
-        footer{
-          margin-left: -162px;
-        }
-      }
-
-      @media (max-width: 600px) {
-        header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        nav ul {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        nav ul li {
-          margin-left: 0;
-          margin-top: 10px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>E-store</h1>
-      <h1>Welcome <%= user.email %></h1>
-      <p>Your User ID: <%= user.id %></p>
-      <nav>
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Products</a></li>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Contact</a></li>
-          <li ><a href="/cart" id="view-cart"></a></li>
-          <li ><a href="/logout" >Logout</a></li>
-          <!-- Link to Cart Page -->
-        </ul>
-      </nav>
-    </header>
-    <div class="container">
-      <div class="product-grid">
-        <div class="product">
-          <img
-            src="https://cdn.pixabay.com/photo/2022/03/02/09/33/purse-7042725_1280.jpg"
-            alt="Handbag"
-          />
-          <div class="product-details">
-            <h3>Handbag</h3>
-            <p>Lorem ipsum dolor sit amet.</p>
-            <div class="price">$10.00</div>
-            <button onclick="addToCart('Handbag', 10)">Add to Cart</button>
-          </div>
-        </div>
-        <div class="product">
-          <img
-            src="https://cdn.pixabay.com/photo/2014/11/14/21/17/smartphone-531250_1280.jpg"
-            alt="Smartphone"
-          />
-          <div class="product-details">
-            <h3>Smartphone</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <div class="price">$20.00</div>
-            <button onclick="addToCart('Smartphone', 20)">Add to Cart</button>
-          </div>
-        </div>
-        <div class="product">
-          <img
-            src="https://m.media-amazon.com/images/I/61+r3+JstZL._SL1500_.jpg"
-            alt="Laptop"
-          />
-          <div class="product-details">
-            <h3>Laptop</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <div class="price">$30.00</div>
-            <button onclick="addToCart('Laptop', 30)">Add to Cart</button>
-          </div>
-        </div>
-        
-        <div class="product">
-          <img
-            src="https://www.boat-lifestyle.com/cdn/shop/files/Artboard_1__3_-removebg-preview_500x.png?v=1686628064"
-            alt="True Wireless"
-          />
-          <div class="product-details">
-            <h3>True Wireless</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <div class="price">$40.00</div>
-            
-            <button onclick="addToCart('True Wireless', 40)">
-              Add to Cart
-            </button>
-          </div>
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>E-store</h1>
+    <h1>Welcome <%= user.email %></h1>
+    <p>Your User ID: <%= user.id %></p>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Products</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Contact</a></li>
+        <li ><a href="/cart" id="view-cart">🛒</a></li>
+        <li ><a href="/logout" >Logout</a></li>
+        <!-- Link to Cart Page -->
+      </ul>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="product-grid">
+      <div class="product">
+        <img
+          src="https://cdn.pixabay.com/photo/2022/03/02/09/33/purse-7042725_1280.jpg"
+          alt="Handbag"
+        />
+        <div class="product-details">
+          <h3>Handbag</h3>
+          <p>Lorem ipsum dolor sit amet.</p>
+          <div class="price">$10.00</div>
+          <button onclick="addToCart('Handbag', 10, 'https://cdn.pixabay.com/photo/2022/03/02/09/33/purse-7042725_1280.jpg')">Add to Cart</button>
         </div>
       </div>
-      <footer>&copy; 2024 My E-commerce Site. All rights reserved.</footer>
+      <div class="product">
+        <img
+          src="https://cdn.pixabay.com/photo/2014/11/14/21/17/smartphone-531250_1280.jpg"
+          alt="Smartphone"
+        />
+        <div class="product-details">
+          <h3>Smartphone</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <div class="price">$20.00</div>
+          <button onclick="addToCart('Smartphone', 20, 'https://cdn.pixabay.com/photo/2014/11/14/21/17/smartphone-531250_1280.jpg')">Add to Cart</button>
+        </div>
+      </div>
+      <div class="product">
+        <img
+          src="https://m.media-amazon.com/images/I/61+r3+JstZL._SL1500_.jpg"
+          alt="Laptop"
+        />
+        <div class="product-details">
+          <h3>Laptop</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <div class="price">$30.00</div>
+          <button onclick="addToCart('Laptop', 30, 'https://m.media-amazon.com/images/I/61+r3+JstZL._SL1500_.jpg')">Add to Cart</button>
+        </div>
+      </div>
+      
+      <div class="product">
+        <img
+          src="https://www.boat-lifestyle.com/cdn/shop/files/Artboard_1__3_-removebg-preview_500x.png?v=1686628064"
+          alt="True Wireless"
+        />
+        <div class="product-details">
+          <h3>True Wireless</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <div class="price">$40.00</div>
+          <button onclick="addToCart('True Wireless', 40, 'https://www.boat-lifestyle.com/cdn/shop/files/Artboard_1__3_-removebg-preview_500x.png?v=1686628064')">Add to Cart</button>
+        </div>
+      </div>
     </div>
-   
-    <script>
-        const allCookies = document.cookie;
-        console.log(allCookies);
-        
-      function addToCart(name, price) {
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.push({ name, price });
-        localStorage.setItem("cart", JSON.stringify(cart));
-        Toastify({
-          text: "item added to cart",
-          duration: 1000,
-          style: {
-            background: "linear-gradient(to right, #00b09b, #96c93d)",
-           marginRight:"600px"
-           
+    <footer>&copy; 2024 My E-commerce Site. All rights reserved.</footer>
+  </div>
+ 
+  <script>
+    const addToCart = async (name, price, imageUrl) => {
+      try {
+        const res = await fetch("/add-to-cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }).showToast();
-        const cartLength =cart.length;
-        const viewCart =document.getElementById("view-cart")
-        viewCart.innerHTML = `<h1>🛒</h1><h1 style="color:red;">${cartLength}</h1>`
-        console.log(cartLength);
-        
+          body: JSON.stringify({
+            itemName: name,
+            itemPrice: price,
+            itemImage: imageUrl 
+          })
+        });
+        const data = await res.json();
+        console.log(data);
+        if (data.message === "Item added to cart") {
+          Toastify({
+            text: "Item added to cart",
+            duration: 1000,
+            style: {
+              background: "linear-gradient(to right, #00b09b, #96c93d)",
+              marginRight: "600px"
+            },
+          }).showToast();
+        }
+        const cart = document.getElementById("view-cart");
+        cart.innerHTML = `<h1 style="color:red;">${data.cartLength}</h1>`;
+      } catch (error) {
+        console.error('Error adding to cart:', error);
       }
-    </script>
-  </body>
+    };
+  </script>
+</body>
 </html>

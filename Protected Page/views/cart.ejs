@@ -1,225 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shopping Cart</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <style>
-      body {
-        font-family: "Roboto", sans-serif;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Cart</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <style>
+    /* Reset default margins and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      header {
-        background-color: #343a40;
-        color: #fff;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-      header h1 {
-        margin: 0;
-        font-size: 24px;
-      }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 800px; /* Limit maximum width */
+      position: relative;
+    }
 
-      nav ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-      }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-      nav ul li {
-        margin-left: 20px;
-      }
+    .cart-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid layout */
+      gap: 20px; /* Space between items */
+    }
 
-      nav ul li a {
-        color: #fff;
-        text-decoration: none;
-        font-weight: 500;
-      }
+    .cart-item {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
 
-      .container {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+    .cart-item:hover {
+      transform: translateY(-5px); /* Lift up effect on hover */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-      .cart {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
+    .cart-item h3 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 8px;
+    }
 
-      .cart h2 {
-        margin-top: 0;
-      }
+    .price {
+      font-size: 16px;
+      color: #777;
+    }
 
-      .cart ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
+    .clear-cart {
+      display: block;
+      width: 100%;
+      max-width: 200px; /* Limit button width */
+      margin: 20px auto 0;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #ff6347;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-      .cart ul li {
-        margin-bottom: 10px;
-        display: flex;
-       flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-      }
+    .clear-cart:hover {
+      background-color: #e05238;
+    }
 
-      .cart ul li span {
-        font-size: 14px;
-        color: #555;
-      }
-
-      .cart .total {
-        margin-top: 20px;
-        font-weight: bold;
-        font-size: 18px;
-        text-align: center;
-      }
-
-      footer {
-        background-color: #343a40;
-        color: #fff;
-        text-align: center;
-        padding: 15px 20px;
-        position: absolute;
-        width: 100%;
-        bottom: 0;
-      }
-   
-
-      @media (max-width: 600px) {
-        header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        nav ul {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        nav ul li {
-          margin-left: 0;
-          margin-top: 10px;
-        }
-      }
-
-      form a {
-        text-decoration: none;
-        padding: 10px;
-        border: 2px solid red;
-        background-color: rgb(132, 40, 40);
-        color:white;
-      }
-      form a:hover{
-        background-color: blueviolet;
-      }
-
-     
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <!-- Your header content -->
-    </header>
-    <div class="container">
-      <div class="cart">
-        <h2>Shopping Cart</h2>
-        <ul id="cart-items">
-          <li>No items in cart</li>
-        </ul>
-        <div class="total" id="cart-total">Total: $0.00</div>
-      </div>
-     
-    </div>
-    <form style="text-align:center;margin-bottom:25px"id="checkout-form" action="/checkout" method="post">
-      <a  href="complete">Proceed to Checkout</a>
-    </form>
-    
-    <script>
-      function loadCart() {
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const cartItems = document.getElementById("cart-items");
-        const cartTotal = document.getElementById("cart-total");
-        cartItems.innerHTML = "";
-        let total = 0;
-
-        if (cart.length === 0) {
-          cartItems.innerHTML = "<li>No items in cart</li>";
-        } else {
-          cart.forEach((item) => {
-            const li = document.createElement("li");
-            li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
-            cartItems.appendChild(li);
-            total += item.price;
-          });
-        }
-
-        cartTotal.textContent = `Total: $${total.toFixed(2)}`;
-      }
-
-      window.onload = async () => {
-        loadCart();
-
-        document.getElementById("checkout-form").onsubmit = async function (e) {
-          e.preventDefault();
-          const cart = JSON.parse(localStorage.getItem("cart")) || [];
-          try {
-            const response = await fetch("/checkout", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                cartItems: cart,
-              }),
-            });
-
-            const data = await response.json();
-            console.log(data);
-
-            if (data.url) {
-              window.location = `${data.url}`;
-              localStorage.removeItem("cart")
-              
-            } else {
-              Toastify({
-                text: "Checkout failed",
-                duration: 3000,
-                style: {
-                  background: "linear-gradient(to right, #00b09b, #96c93d)",
-                  marginRight:"600px"
-                 
-                },
-              }).showToast();
-              
-            }
-          } catch (error) {
-            console.error("Error during checkout:", error);
-            alert("An error occurred during checkout. Please try again later.");
-          }
-        };
-      };
-
+    div a{
+      position: absolute;
+      top:0;
+      right:0;
+      border:2px solid black;
+      background-color: rgb(26, 26, 134);
+      text-decoration: none;
+      padding: 8px;
       
-    </script>
-  </body>
+    }
+
+    div a:hover{
+      background-color: rgb(127, 31, 31);
+    }
+  
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Your Cart</h1>
+    <div class="cart-items">
+      <% cart.forEach(item => { %>
+        <div class="cart-item">
+          <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 100%; height: auto;">
+          <h3><%= item.name %></h3>
+          <div class="price">$<%= item.price %></div>
+        </div>
+      <% }); %>
+    </div>
+   
+    <button class="clear-cart" onclick="clearCart()">Clear cart</button>
+  </div>
+  <div><a href="complete">Checkout</a></div>
+
+  <script>
+    const clearCart = async () => {
+      try {
+        const res = await fetch("/clear-cart", {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (data.message === "Cart cleared") {
+          location.reload();
+        }
+      } catch (error) {
+        console.error(`Error: ${error}`);
+      }
+    }
+  </script>
+</body>
 </html>

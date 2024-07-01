@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  cart: {
+    type: Array,
+    default: [],
   },
 });
 
@@ -142,10 +146,45 @@ app.get("/protected", authenticateToken, (req, res) => {
   res.render("protectedpage", { user: req.user });
 });
 
-// cart
-app.get("/cart", authenticateToken, (req, res) => {
-  res.render("cart");
+// Add item to cart routes
+
+app.post("/add-to-cart", authenticateToken, async (req, res) => {
+  const { itemName, itemPrice, itemImage } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    user.cart.push({ name: itemName, price: itemPrice, image: itemImage });
+    await user.save();
+    res
+      .status(200)
+      .json({ message: "Item added to cart", cartLength: user.cart.length });
+  } catch (err) {
+    console.error("Error adding item to cart:", err);
+    res.status(500).json({ message: err.message });
+  }
 });
+
+// cart
+app.get("/cart", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const cart = user.cart;
+    res.render("cart", { cart });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/clear-cart", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    user.cart = [];
+    await user.save();
+    res.status(200).json({ message: "Cart cleared" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.get("/complete", authenticateToken, (req, res) => {
   res.render("complete");
 });
