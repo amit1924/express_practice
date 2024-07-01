@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>logout</title>
+   
+</head>
+<body>
+    <div>
+        <button id="logoutButton">Logout</button>
+    </div>
+    <script>
+        const logoutButton =document.getElementById("logoutButton");
+      
+        const handleLogout = async ()=>{
+const userId = await localStorage.getItem("userId");
+
+if(!userId) return
+        
+const data ={userId}
+
+try{
+const res =await fetch("/logout",{
+    method: "POST",
+    headers:{
+        "content-type": "application/json"
+    },body: JSON.stringify(data)
+    
+})
+const resData = await res.json()
+
+if (res.ok){
+console.log(resData.message);
+    localStorage.removeItem("userId")
+    window.location.href ="../login.html"
+}else{
+    console.log(resData.message)
+}
+}catch(err){
+console.error(`Error: ${err.message}`)
+}
+        }
+
+        logoutButton.addEventListener("click",handleLogout)
+
+    </script>
+</body>
+</html>

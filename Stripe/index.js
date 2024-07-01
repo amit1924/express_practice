@@ -63,24 +63,24 @@ app.post("/checkout", async (req, res) => {
   }
 });
 
-app.get("/complete", async (req, res) => {
+// Route to serve the completion page
+app.get("/complete", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "complete.html"));
+});
+
+// Route to fetch session data
+app.get("/session-data", async (req, res) => {
   const sessionId = req.query.session_id;
 
   try {
-    // Retrieve the session with expanded payment intent and payment method details
-    const sessionPromise = stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["payment_intent.payment_method"],
-    });
+    const [session, lineItems] = await Promise.all([
+      stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ["payment_intent.payment_method"],
+      }),
+      stripe.checkout.sessions.listLineItems(sessionId),
+    ]);
 
-    // Fetch line items associated with the session
-    const lineItemsPromise = stripe.checkout.sessions.listLineItems(sessionId);
-
-    // Execute both promises concurrently using Promise.all
-    const result = await Promise.all([sessionPromise, lineItemsPromise]);
-
-    console.log(JSON.stringify(result));
-
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.json({ session, lineItems });
   } catch (error) {
     console.error("Error retrieving Stripe session:", error);
     res.status(500).json({ error: "Internal Server Error" });

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout Complete</title>
+  <style>
+    .message {
+      text-align: center;
+      margin-top: 20px;
+    }
+    div{
+        position: relative;
+    }
+    .home-link{
+        position: absolute;
+        top:0;
+        left:0;
+        font-size: 29px;
+        border: 2px solid rgb(255, 255, 255);
+        padding: 5px;
+        border-radius: 12px;
+        background-color: cornflowerblue;
+        
+    }
+    .home-link:hover{
+        background-color: rgb(158, 35, 35);
+    }
+    .home-link a{
+        text-decoration: none;
+    }
+
+  </style>
+</head>
+<body>
+    <div ><h1 class="message">Payment is being processed...</h1>
+    <div class="home-link"><a href="index.html">Home</a></div>
+    </div>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Fetch the session ID from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+
+      // Fetch the session data using AJAX
+      fetch(`/session-data?session_id=${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.session.payment_status === 'paid') {
+            document.querySelector('.message').innerText = 'Payment successful! Thank you for your purchase.';
+          } else {
+            document.querySelector('.message').innerText = 'Payment failed or is still processing.';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching session data:', error);
+          document.querySelector('.message').innerText = 'There was an error processing your payment.';
+        });
+    });
+  </script>
+</body>
+</html>

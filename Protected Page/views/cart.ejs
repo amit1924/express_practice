@@ -121,6 +121,17 @@
         }
       }
 
+      form a {
+        text-decoration: none;
+        padding: 10px;
+        border: 2px solid red;
+        background-color: rgb(132, 40, 40);
+        color:white;
+      }
+      form a:hover{
+        background-color: blueviolet;
+      }
+
      
     </style>
   </head>
@@ -140,7 +151,7 @@
      
     </div>
     <form style="text-align:center;margin-bottom:25px"id="checkout-form" action="/checkout" method="post">
-      <button  type="submit">Proceed to Checkout</button>
+      <a  href="complete">Proceed to Checkout</a>
     </form>
     
     <script>

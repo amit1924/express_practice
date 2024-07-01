@@ -145,13 +145,16 @@
   <body>
     <header>
       <h1>E-store</h1>
+      <h1>Welcome <%= user.email %></h1>
+      <p>Your User ID: <%= user.id %></p>
       <nav>
         <ul>
           <li><a href="#">Home</a></li>
           <li><a href="#">Products</a></li>
           <li><a href="#">About Us</a></li>
           <li><a href="#">Contact</a></li>
-          <li ><a href="cart.html" id="view-cart"></a></li>
+          <li ><a href="/cart" id="view-cart"></a></li>
+          <li ><a href="/logout" >Logout</a></li>
           <!-- Link to Cart Page -->
         </ul>
       </nav>
@@ -215,6 +218,9 @@
     </div>
    
     <script>
+        const allCookies = document.cookie;
+        console.log(allCookies);
+        
       function addToCart(name, price) {
         let cart = JSON.parse(localStorage.getItem("cart")) || [];
         cart.push({ name, price });

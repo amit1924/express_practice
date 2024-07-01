@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Stripe.js v3 with Bootstrap 4 Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        /* Blue outline on focus */
+        .StripeElement--focus {
+            border-color: #80BDFF;
+            outline:0;
+            box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+        /* Can't see what I type without this */
+        #card-number.form-control,
+        #card-cvc.form-control,
+        #card-exp.form-control {
+            display:inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <h1 class="mt-5 text-center">Payment</h1>
+        <div id="card-errors" ></div>
+        <div class="card">
+            <div class="card-body">
+                <form id="payment-form">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"></span>
+                        </div>
+                        <input type="text" class="form-control" id="name" placeholder="Name on Card">
+                        <div class="input-group-append">
+                            <span class="input-group-text"></span>
+                        </div>
+                    </div>
+                    <label for="card-number">Credit Card Number</label>
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"></span>
+                        </div>
+                        <div id="card-number" class="form-control">
+                            <!-- Stripe Card Element -->
+                        </div>
+                        <div class="input-group-append">
+                            <span class="input-group-text"></span>
+                        </div>
+                    </div>
+                    <label for="card-cvc">CVC Number</label>
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">E</span>
+                        </div>
+                        <div id="card-cvc" class="form-control">
+                            <!-- Stripe CVC Element -->
+                        </div>
+                    </div>
+                    <label for="card-exp">Expiration</label>
+                    <div class="input-group mb-2">
+                        <div id="card-exp" class="form-control">
+                            <!-- Stripe Card Expiry Element -->
+                        </div>
+                        <div class="input-group-append">
+                            <span class="input-group-text">F</span>
+                        </div>
+                    </div>
+                    <button id="payment-submit" class="btn btn-primary mt-1">Submit Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    $(document).ready(function(){
+
+        // Create a Stripe client
+        const stripe = Stripe('pk_test_51PWJdGB5N0Zx5iP6dGE7fxCHG6wBdskbqP8FN8RNKb8ODqg9DivyYMLo49XwfIHjx9xl38ePBrpfNIbLqDyARwYl00D0RxJ1JC');
+
+        // Create an instance of Elements
+        const elements = stripe.elements();
+
+        // Custom styling can be passed to options when creating an Element.
+        const style = {
+            base: {
+                fontFamily: 'Sohne, system-ui, sans-serif',
+                fontWeightNormal: '500',
+                borderRadius: '8px',
+                colorBackground: '#0A2540',
+                colorPrimary: '#EFC078',
+                accessibleColorOnColorPrimary: '#1A1B25',
+                colorText: 'white',
+                colorTextSecondary: 'white',
+                colorTextPlaceholder: '#ABB2BF',
+                tabIconColor: 'white',
+                logoColor: 'dark'
+                
+            },
+            invalid: {
+                color: '#fa755a',
+                iconColor: '#fa755a'
+            }
+        };
+
+        // Create an instance of the card Element.
+        const cardNumber = elements.create('cardNumber', { style });
+        cardNumber.mount('#card-number');
+
+        const cardCvc = elements.create('cardCvc', { style });
+        cardCvc.mount('#card-cvc');
+
+        const cardExpiry = elements.create('cardExpiry', { style });
+        cardExpiry.mount('#card-exp');
+
+        // Handle real-time validation errors from the card Element.
+        cardNumber.addEventListener('change', function(event) {
+            const displayError = document.getElementById('card-errors');
+            
+            
+
+            if (event.error) {
+                
+                displayError.innerText = alert(event.error.message)
+                ;
+            } else {
+               
+                displayError.textContent = '';
+            }
+        });
+
+        // Handle form submission.
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            try {
+                const response = await fetch('/payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount: 5000, currency: 'usd' }) 
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log(data);
+                console.log('Received clientSecret:', data.clientSecret);
+
+                const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: cardNumber,
+                        billing_details: {
+                            name: document.getElementById('name').value
+                        }
+                    }
+                });
+
+                if (error) {
+                    console.error('Payment confirmation error:', error);
+                    document.getElementById('card-errors').textContent = alert(error.message)
+                } else if (paymentIntent.status === 'succeeded') {
+                    console.log('Payment successful!');
+                    alert('Payment successful!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('card-errors').textContent = error.message;
+            }
+        });
+    });
+</script>
+</body>
+</html>

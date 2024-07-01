@@ -1,5 +1,5 @@
 {
-  "name": "stripe",
+  "name": "protected-page",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,10 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.4.5",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "i": "^0.3.7",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.4",
     "nodemon": "^3.1.4",
-    "stripe": "^16.1.0",
+    "npm": "^10.8.1",
     "toastify-js": "^1.12.0"
   }
 }
