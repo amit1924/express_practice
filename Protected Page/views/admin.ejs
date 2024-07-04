@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+      width: 100%;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .sidebar nav ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar nav ul li {
+      margin-bottom: 10px;
+    }
+    .sidebar nav ul li a {
+      color: #ecf0f1;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .sidebar nav ul li a:hover {
+      background-color: #34495e;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background-color: #ecf0f1;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    table th {
+      background-color: #2c3e50;
+      color: white;
+    }
+    #updateForm {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    #updateForm form {
+      display: flex;
+      flex-direction: column;
+    }
+    #updateForm label {
+      margin: 10px 0 5px;
+    }
+    #updateForm input, #updateForm select, #updateForm button {
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Admin Dashboard</h2>
+      <nav>
+        <ul>
+          <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+          <li><a href="#" onclick="showSection('users')">Manage Users</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div id="dashboard" class="section active">
+        <h1>Welcome, Admin</h1>
+        <canvas id="userChart"></canvas>
+      </div>
+      <div id="users" class="section">
+        <h1>Manage Users</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Cart Items</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(user => { %>
+            <tr>
+              <td><%= user.email %></td>
+              <td><%= user.role %></td>
+              <td>
+                <ul>
+                  <% user.cart.forEach((item, index) => { %>
+                  <li>
+                    <%= item.name %> - <%= item.price %> USD
+                    <button onclick="showUpdateCartItemForm('<%= user._id %>', '<%= index %>', '<%= item.name %>', '<%= item.price %>')">Edit</button>
+                    <button onclick="deleteCartItem('<%= user._id %>', '<%= index %>')">Delete</button>
+                  </li>
+                  <% }) %>
+                </ul>
+              </td>
+              <td>
+                <button onclick="showUpdateForm('<%= user._id %>', '<%= user.email %>', '<%= user.role %>')">Edit</button>
+                <button onclick="deleteUser('<%= user._id %>')">Delete</button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <!-- Update User Form -->
+        <div id="updateForm" style="display:none;">
+          <h2>Update User</h2>
+          <form id="updateUserForm">
+            <input type="hidden" id="updateUserId" name="userId">
+            <label for="updateEmail">Email:</label>
+            <input type="email" id="updateEmail" name="email">
+            <label for="updatePassword">Password:</label>
+            <input type="password" id="updatePassword" name="password">
+            <label for="updateRole">Role:</label>
+            <select id="updateRole" name="role">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Update</button>
+            <button type="button" onclick="hideUpdateForm()">Cancel</button>
+          </form>
+        </div>
+        <!-- Update Cart Item Form -->
+        <div id="updateCartItemForm" style="display:none;">
+          <h2>Update Cart Item</h2>
+          <form id="updateCartItemForm">
+            <input type="hidden" id="updateCartUserId" name="userId">
+            <input type="hidden" id="updateCartItemIndex" name="itemIndex">
+            <label for="updateCartItemName">Item Name:</label>
+            <input type="text" id="updateCartItemName" name="itemName">
+            <label for="updateCartItemPrice">Item Price:</label>
+            <input type="number" id="updateCartItemPrice" name="itemPrice">
+            <button type="submit">Update</button>
+            <button type="button" onclick="hideUpdateCartItemForm()">Cancel</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function showUpdateForm(userId, email, role) {
+      document.getElementById('updateUserId').value = userId;
+      document.getElementById('updateEmail').value = email;
+      document.getElementById('updateRole').value = role;
+      document.getElementById('updateForm').style.display = 'block';
+    }
+
+    function hideUpdateForm() {
+      document.getElementById('updateForm').style.display = 'none';
+    }
+
+    function showUpdateCartItemForm(userId, itemIndex, itemName, itemPrice) {
+      document.getElementById('updateCartUserId').value = userId;
+      document.getElementById('updateCartItemIndex').value = itemIndex;
+      document.getElementById('updateCartItemName').value = itemName;
+      document.getElementById('updateCartItemPrice').value = itemPrice;
+      document.getElementById('updateCartItemForm').style.display = 'block';
+    }
+
+    function hideUpdateCartItemForm() {
+      document.getElementById('updateCartItemForm').style.display = 'none';
+    }
+
+    document.getElementById('updateUserForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const form = event.target;
+      const userId = form.userId.value;
+      const email = form.email.value;
+      const password = form.password.value;
+      const role = form.role.value;
+
+      const response = await fetch('/admin/update-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, email, password, role }),
+      });
+
+      if (response.ok) {
+        Toastify({ text: 'User updated successfully', backgroundColor: 'green' }).showToast();
+        location.reload();
+      } else {
+        Toastify({ text: 'Failed to update user', backgroundColor: 'red' }).showToast();
+      }
+    });
+
+    document.getElementById('updateCartItemForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const form = event.target;
+      const userId = form.userId.value;
+      const itemIndex = form.itemIndex.value;
+      const itemName = form.itemName.value;
+      const itemPrice = form.itemPrice.value;
+
+      const response = await fetch('/admin/update-cart-item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, itemIndex, itemName, itemPrice }),
+      });
+
+      if (response.ok) {
+        Toastify({ text: 'Cart item updated successfully', backgroundColor: 'green' }).showToast();
+        location.reload();
+      } else {
+        Toastify({ text: 'Failed to update cart item', backgroundColor: 'red' }).showToast();
+      }
+    });
+
+    async function deleteUser(userId) {
+      const response = await fetch('/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (response.ok) {
+        Toastify({ text: 'User deleted successfully', backgroundColor: 'green' }).showToast();
+        location.reload();
+      } else {
+        Toastify({ text: 'Failed to delete user', backgroundColor: 'red' }).showToast();
+      }
+    }
+
+    async function deleteCartItem(userId, itemIndex) {
+      const response = await fetch('/admin/delete-cart-item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, itemIndex }),
+      });
+
+      if (response.ok) {
+        Toastify({ text: 'Cart item deleted successfully', backgroundColor: 'green' }).showToast();
+        location.reload();
+      } else {
+        Toastify({ text: 'Failed to delete cart item', backgroundColor: 'red' }).showToast();
+      }
+    }
+
+    const ctx = document.getElementById('userChart').getContext('2d');
+    const userChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['User1', 'User2', 'User3'],
+        datasets: [{
+          label: 'User Statistics',
+          data: [10, 20, 30],
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

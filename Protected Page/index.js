@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
 });
 
 const User = mongoose.model("User", userSchema);
@@ -43,9 +48,13 @@ const SECRET_KEY = "secret123456";
 
 // function to create JWT token
 const createToken = (user) => {
-  return jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
+  return jwt.sign(
+    { id: user._id, email: user.email, role: user.role },
+    SECRET_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
 };
 
 // Middleware to protect routes
@@ -72,7 +81,7 @@ app.get("/", (re, res) => {
 
 // Register post
 app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   // Basic input validation
   if (!email || !password) {
@@ -97,11 +106,124 @@ app.post("/register", async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+////////////////////////////////////////////////////////////////////////
+// Admin Middleware
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Access denied: Admins only" });
+  }
+  next();
+};
 
-// login routes
-app.get("/login", (req, res) => {
-  res.render("login");
+// Admin Routes
+app.get("/admin", authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.render("admin", { users: users });
+  } catch (err) {
+    res.status(500).render("error", { message: err.message });
+  }
 });
+
+// Delete user Routes
+app.post("/admin/delete-user", authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    await User.findByIdAndDelete(userId);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update user routes
+app.post("/admin/update-user", authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { userId, email, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.findByIdAndUpdate(userId, {
+      email,
+      password: hashedPassword,
+      role,
+    });
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Upadte cart
+app.post(
+  "/admin/update-cart-item",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { userId, itemIndex, itemName, itemPrice } = req.body;
+
+      // Parse itemIndex to integer
+      const index = parseInt(itemIndex);
+      console.log(`index:${index}`);
+
+      // Find and update the user document
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            [`cart.${index}.name`]: itemName,
+            [`cart.${index}.price`]: parseFloat(itemPrice),
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Log and respond with success message
+      console.log(`Updated user cart:`, updatedUser.cart);
+
+      res.status(200).json({
+        message: "Cart item updated successfully",
+        updatedUser: updatedUser,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: err.message });
+    }
+  }
+);
+//Delete the cart item
+
+app.post(
+  "/admin/delete-cart-item",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { userId, itemIndex } = req.body;
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Delete cart item by index
+      const index = itemIndex.index;
+      user.cart.splice(index, 1);
+      await user.save();
+
+      res.status(200).json({ message: "Cart item deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+);
+
 // Login POST
 // app.post("/login", async (req, res) => {
 //   const { email, password } = req.body;
@@ -117,6 +239,11 @@ app.get("/login", (req, res) => {
 //   res.cookie("jwt", token, { httpOnly: true });
 //   res.redirect("/protected");
 // });
+
+// //////////////////////////////////////////////////////////////////
+app.get("/login", async (req, res) => {
+  res.render("login");
+});
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -139,6 +266,7 @@ app.post("/login", async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 });
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Protected route
 app.get("/protected", authenticateToken, (req, res) => {
@@ -163,6 +291,8 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
+////////////////////////////////////////////////////////////////////////////
+
 // cart
 app.get("/cart", authenticateToken, async (req, res) => {
   try {
@@ -185,15 +315,18 @@ app.post("/clear-cart", authenticateToken, async (req, res) => {
   }
 });
 
+/// //////////////////////////////////////////////////////////////////
+
 app.get("/complete", authenticateToken, (req, res) => {
   res.render("complete");
 });
-
+//  ////////////////////////////////////////////////////////////////////
 // Logout route
 app.get("/logout", (req, res) => {
   res.clearCookie("jwt"); // Clear the jwt cookie
   res.redirect("/login"); // Redirect to login page or any other appropriate page
 });
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
