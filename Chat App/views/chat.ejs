@@ -1,0 +1,98 @@
+<%- include('partials/header', { title: 'Chat' }) %>
+<div class="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+  <h1 class="text-3xl font-bold mb-6">Welcome, <%= user.username %></h1>
+  <div class="mb-6">
+    <h2 class="text-2xl font-semibold mb-4">Users</h2>
+    <ul id="user-list" class="list-none p-0 space-y-2">
+      <% users.forEach(user => { %>
+        <li>
+          <button class="user-btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" data-user-id="<%= user._id %>" data-username="<%= user.username %>">
+            <%= user.username %>
+          </button>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <div id="chat-room" class="w-full max-w-4xl p-6 border border-gray-300 rounded-lg bg-white shadow-md hidden">
+    <h2 id="chat-with" class="text-2xl font-semibold mb-4"></h2>
+    <div id="messages" class="h-96 overflow-y-auto mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+      <!-- Messages will be appended here -->
+    </div>
+    <form id="message-form" class="flex">
+      <input id="message-input" type="text" placeholder="Type a message" class="w-full p-3 border border-gray-300 rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Send</button>
+    </form>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const userList = document.getElementById('user-list');
+  const chatRoom = document.getElementById('chat-room');
+  const chatWith = document.getElementById('chat-with');
+  const messageForm = document.getElementById('message-form');
+  const messageInput = document.getElementById('message-input');
+  const messagesContainer = document.getElementById('messages');
+
+  let roomId;
+  const userId = '<%= user.id %>';
+
+  // Handle user list button click
+  userList.addEventListener('click', e => {
+    if (e.target.classList.contains('user-btn')) {
+      const otherUserId = e.target.dataset.userId;
+      const username = e.target.dataset.username;
+      roomId = generateRoomId(userId, otherUserId);
+      chatWith.textContent = `Chatting with ${username}`;
+      chatRoom.classList.remove('hidden');
+      console.log(`Joining room ${roomId}`);
+      socket.emit('join-room', userId, otherUserId);
+    }
+  });
+
+  // Load previous messages
+  socket.on('loadMessages', messages => {
+    messagesContainer.innerHTML = ''; // Clear previous messages
+    messages.forEach(message => {
+      displayMessage(message);
+    });
+  });
+
+  // Handle incoming messages
+  socket.on('createMessage', message => {
+    console.log(`Received message: ${message.content}`);
+    displayMessage(message);
+  });
+
+  // Handle message form submission
+  messageForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const message = messageInput.value;
+    console.log(`Sending message: ${message}`);
+    if (roomId) {
+      socket.emit('message', message);
+      messageInput.value = '';
+    }
+  });
+
+  // Display a message in the chat
+  function displayMessage({ sender, content }) {
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = content;
+    messageDiv.classList.add('message', 'p-3', 'rounded-lg', 'max-w-xs', 'break-words', 'my-2');
+    if (sender === userId) {
+      messageDiv.classList.add('bg-blue-200', 'text-right', 'self-end', 'ml-auto'); // Sender's messages: right aligned
+    } else {
+      messageDiv.classList.add('bg-gray-200', 'text-left', 'self-start', 'mr-auto'); // Receiver's messages: left aligned
+    }
+    messagesContainer.appendChild(messageDiv);
+    // Ensure messages scroll to the bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  // Generate room ID based on user IDs
+  function generateRoomId(userId1, userId2) {
+    return [userId1, userId2].sort().join('_');
+  }
+</script>
+<%- include('partials/footer') %>

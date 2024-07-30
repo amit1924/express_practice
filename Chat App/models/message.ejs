@@ -1,0 +1,23 @@
+const mongoose = require('mongoose');
+
+const messageSchema = new mongoose.Schema({
+  roomId: {
+    type: String,
+    required: true,
+  },
+  sender: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date, // Define as Date type
+    default: Date.now, // Default to current date and time
+  },
+});
+
+const Message = mongoose.model('Message', messageSchema);
+module.exports = Message;
