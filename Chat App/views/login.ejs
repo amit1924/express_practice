@@ -1,14 +1,19 @@
 <%- include('partials/header', { title: 'Login' }) %>
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl mb-4">Login</h1>
-  <form action="/login" method="POST" class="w-full max-w-sm">
+  <% if (error) { %>
+    <p class="text-red-500 text-xs mb-4"><%= error %></p>
+  <% } %>
+  <form id="login-form" action="/login" method="POST" class="w-full max-w-sm">
     <div class="mb-4">
       <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
-      <input name="email" type="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <input id="email" name="email" type="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <p id="email-error" class="text-red-500 text-xs mt-2 hidden">Please enter a valid email.</p>
     </div>
     <div class="mb-6">
       <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password</label>
-      <input name="password" type="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <input id="password" name="password" type="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <p id="password-error" class="text-red-500 text-xs mt-2 hidden">Password must be at least 6 characters long.</p>
     </div>
     <div class="flex items-center justify-between">
       <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Login</button>
@@ -16,4 +21,34 @@
   </form>
   <p class="mt-4">Don't have an account? <a href="/register" class="text-blue-500">Register</a></p>
 </div>
+<script>
+  document.getElementById('login-form').addEventListener('submit', function(event) {
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+
+    let valid = true;
+
+    // Email validation
+    if (!email.value || !/^\S+@\S+\.\S+$/.test(email.value)) {
+      emailError.classList.remove('hidden');
+      valid = false;
+    } else {
+      emailError.classList.add('hidden');
+    }
+
+    // Password validation
+    if (!password.value || password.value.length < 6) {
+      passwordError.classList.remove('hidden');
+      valid = false;
+    } else {
+      passwordError.classList.add('hidden');
+    }
+
+    if (!valid) {
+      event.preventDefault();
+    }
+  });
+</script>
 <%- include('partials/footer') %>

@@ -8,11 +8,12 @@
     word-wrap: break-word;
     clear: both;
     position: relative;
+    color: red;
   }
   
   /* Messages sent by the current user */
   .my-message {
-    background-color: #d1e7dd; /* Light green background */
+    background-color: #000000; /* Light green background */
     text-align: right; /* Align text to the right */
     margin-left: auto; /* Align to the right */
     margin-right: 10px;
@@ -27,4 +28,6 @@
     margin-left: 10px;
     margin-bottom: 10px;
   }
+  
+
   

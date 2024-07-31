@@ -1,0 +1,366 @@
+Example 1: User has a valid token
+User Cookie:
+
+The user has a valid JWT stored in the jwt cookie:
+
+req.cookies = { jwt: "validToken123" };
+Token Verification:
+
+The jwt.verify method successfully verifies the token and decodes it to:
+
+user = { id: "123", username: "JohnDoe" };
+Middleware Execution:
+
+The token is valid, so the middleware sets req.user and calls next():
+
+req.user = { id: "123", username: "JohnDoe" };
+next();
+Next Middleware or Route Handler:
+
+The request proceeds to the next middleware or route handler with the authenticated user's information attached.
+Example 2: User does not have a token
+User Cookie:
+
+The user does not have a JWT cookie:
+
+req.cookies = {};
+Token Check:
+
+The middleware checks for the token and finds it missing:
+
+if (!token) return res.redirect("/login");
+Redirection:
+
+The user is redirected to the login page.
+Example 3: User has an invalid token
+User Cookie:
+
+The user has an invalid JWT stored in the jwt cookie:
+
+req.cookies = { jwt: "invalidToken123" };
+Token Verification:
+
+The jwt.verify method fails to verify the token and returns an error:
+
+err = new Error("invalid token");
+Middleware Execution:
+
+The token is invalid, so the middleware redirects the user to the login page:
+
+if (err) return res.redirect("/login");
+
+
+////////////////////////////////////////////////////////
+
+
+
+User Authentication:
+
+Assume we have a middleware function authenticateToken that verifies the user's JWT token and populates req.user with the user's information. Let's say req.user is populated with:
+
+req.user = { id: "123", username: "JohnDoe" };
+Database Users:
+
+Assume our User collection in the database has the following documents:
+
+[
+  { _id: "123", username: "JohnDoe" },
+  { _id: "456", username: "JaneDoe" },
+  { _id: "789", username: "Smith" }
+]
+Fetching Users:
+
+The query User.find({ _id: { $ne: req.user.id } }, "username _id") will find all users except the user with _id "123". So, it will return:
+
+[
+  { _id: "456", username: "JaneDoe" },
+  { _id: "789", username: "Smith" }
+]
+Rendering the Template:
+
+The res.render method will render the chat template and pass the following data:
+
+res.render("chat", {
+  user: { id: "123", username: "JohnDoe" },
+  users: [
+    { _id: "456", username: "JaneDoe" },
+    { _id: "789", username: "Smith" }
+  ]
+});
+
+////////////////////////////////////////////////////////////////User Authentication:
+
+Assume we have a middleware function authenticateToken that verifies the user's JWT token and populates req.user with the user's information. Let's say req.user is populated with:
+
+req.user = { id: "123", username: "JohnDoe" };
+Database Users:
+
+Assume our User collection in the database has the following documents:
+
+[
+  { _id: "123", username: "JohnDoe" },
+  { _id: "456", username: "JaneDoe" },
+  { _id: "789", username: "Smith" }
+]
+Fetching Users:
+
+The query User.find({ _id: { $ne: req.user.id } }, "username _id") will find all users except the user with _id "123". So, it will return:
+
+[
+  { _id: "456", username: "JaneDoe" },
+  { _id: "789", username: "Smith" }
+]
+Rendering the Template:
+
+The res.render method will render the chat template and pass the following data:
+
+res.render("chat", {
+  user: { id: "123", username: "JohnDoe" },
+  users: [
+    { _id: "456", username: "JaneDoe" },
+    { _id: "789", username: "Smith" }
+  ]
+});
+
+///////////////////////////////////////////////////////////////////////////////
+index.js code below
+const express = require("express");
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const cookieParser = require("cookie-parser");
+const { Server } = require("socket.io");
+const http = require("http");
+const path = require("path");
+require("dotenv").config();
+
+const User = require("./models/User.ejs");
+const Message = require("./models/message.ejs");
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {});
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
+app.set("view engine", "ejs");
+app.use(express.static(path.join(__dirname, "public")));
+
+// Middleware to check authentication
+function authenticateToken(req, res, next) {
+  const token = req.cookies.jwt;
+  if (!token) return res.redirect("/login");
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.redirect("/login");
+    req.user = user;
+    next();
+  });
+}
+
+// Routes
+app.get("/", authenticateToken, async (req, res) => {
+  const users = await User.find({ _id: { $ne: req.user.id } }, "username _id");
+  res.render("chat", { user: req.user, users });
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (user && bcrypt.compareSync(password, user.password)) {
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET
+    );
+    res.cookie("jwt", token, { httpOnly: true });
+    res.redirect("/");
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+app.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 8);
+  const user = new User({ username, email, password: hashedPassword });
+  await user.save();
+  res.redirect("/login");
+});
+
+// Generate a unique room ID based on user IDs
+function generateRoomId(userId1, userId2) {
+  return [userId1, userId2].sort().join("_");
+}
+
+// Socket.io
+// io.on("connection", (socket) => {
+//   console.log("A user connected");
+
+//   socket.on("join-room", (userId, otherUserId) => {
+//     const roomId = generateRoomId(userId, otherUserId);
+//     socket.join(roomId);
+//     console.log(`User ${userId} joined room ${roomId}`);
+
+//     socket.on("message", (message) => {
+//       console.log(`Message in room ${roomId}: ${message}`);
+//       io.to(roomId).emit("createMessage", message);
+//     });
+
+//     socket.on("disconnect", () => {
+//       console.log(`User ${userId} disconnected from room ${roomId}`);
+//     });
+//   });
+// });
+
+////////////////////////////////////////////////////////////////
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("join-room", async (userId, otherUserId) => {
+    const roomId = generateRoomId(userId, otherUserId);
+    socket.join(roomId);
+    console.log(`User ${userId} joined room ${roomId}`);
+
+    // Retrieve message history
+    const messages = await Message.find({ roomId }).sort({ timestamp: 1 });
+    socket.emit("loadMessages", messages);
+
+    // Create a new message
+    socket.on("message", (message) => {
+      const timestamp = new Date(); // Create a Date object
+      Message.create({
+        roomId,
+        sender: userId,
+        content: message,
+        timestamp,
+      });
+      io.to(roomId).emit("createMessage", {
+        sender: userId,
+        content: message,
+        timestamp,
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`User ${userId} disconnected from room ${roomId}`);
+    });
+  });
+});
+
+// Start Server
+server.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
+
+///////////////////////////////////////////////////////////////////////////
+CHat.ejs
+<%- include('partials/header', { title: 'Chat' }) %>
+<div class="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+  <h1 class="text-3xl font-bold mb-6">Welcome, <%= user.username %></h1>
+  <div class="mb-6">
+    <h2 class="text-2xl font-semibold mb-4">Users</h2>
+    <ul id="user-list" class="list-none p-0 space-y-2">
+      <% users.forEach(user => { %>
+        <li>
+          <button class="user-btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" data-user-id="<%= user._id %>" data-username="<%= user.username %>">
+            <%= user.username %>
+          </button>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <div id="chat-room" class="w-full max-w-4xl p-6 border border-gray-300 rounded-lg bg-white shadow-md hidden">
+    <h2 id="chat-with" class="text-2xl font-semibold mb-4"></h2>
+    <div id="messages" class="h-96 overflow-y-auto mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+      <!-- Messages will be appended here -->
+    </div>
+    <form id="message-form" class="flex">
+      <input id="message-input" type="text" placeholder="Type a message" class="w-full p-3 border border-gray-300 rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Send</button>
+    </form>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const userList = document.getElementById('user-list');
+  const chatRoom = document.getElementById('chat-room');
+  const chatWith = document.getElementById('chat-with');
+  const messageForm = document.getElementById('message-form');
+  const messageInput = document.getElementById('message-input');
+  const messagesContainer = document.getElementById('messages');
+
+  let roomId;
+  const userId = '<%= user.id %>';
+
+  // Handle user list button click
+  userList.addEventListener('click', e => {
+    if (e.target.classList.contains('user-btn')) {
+      const otherUserId = e.target.dataset.userId;
+      const username = e.target.dataset.username;
+      roomId = generateRoomId(userId, otherUserId);
+      chatWith.textContent = `Chatting with ${username}`;
+      chatRoom.classList.remove('hidden');
+      console.log(`Joining room ${roomId}`);
+      socket.emit('join-room', userId, otherUserId);
+    }
+  });
+
+  // Load previous messages
+  socket.on('loadMessages', messages => {
+    messagesContainer.innerHTML = ''; // Clear previous messages
+    messages.forEach(message => {
+      displayMessage(message);
+    });
+  });
+
+  // Handle incoming messages
+  socket.on('createMessage', message => {
+    console.log(`Received message: ${message.content}`);
+    displayMessage(message);
+  });
+
+  // Handle message form submission
+  messageForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const message = messageInput.value;
+    console.log(`Sending message: ${message}`);
+    if (roomId) {
+      socket.emit('message', message);
+      messageInput.value = '';
+    }
+  });
+
+  // Display a message in the chat
+  function displayMessage({ sender, content }) {
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = content;
+    messageDiv.classList.add('message', 'p-3', 'rounded-lg', 'max-w-xs', 'break-words', 'my-2');
+    if (sender === userId) {
+      messageDiv.classList.add('bg-blue-200', 'text-right', 'self-end', 'ml-auto'); // Sender's messages: right aligned
+    } else {
+      messageDiv.classList.add('bg-gray-200', 'text-left', 'self-start', 'mr-auto'); // Receiver's messages: left aligned
+    }
+    messagesContainer.appendChild(messageDiv);
+    // Ensure messages scroll to the bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  // Generate room ID based on user IDs
+  function generateRoomId(userId1, userId2) {
+    return [userId1, userId2].sort().join('_');
+  }
+</script>
+<%- include('partials/footer') %>
