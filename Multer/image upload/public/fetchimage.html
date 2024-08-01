@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="image-gallery">
+        <h1>Fetch Image</h1>
+        <div id="images"></div>
+    </div>
+
+
+    <script>
+        const fetchImages=async()=>{
+            try{
+const response =await fetch ("http://localhost:3000/images")
+const imageData =await response.json()
+console.log(imageData);
+const imageContainer =document.getElementById("images")
+imageContainer.innerHTML=""
+
+imageData.images.map(image=>{
+    const imageElement =document.createElement("img")
+    imageElement.src=`http://localhost:3000/uploads/${image.filename}`
+    imageElement.alt=image.originalname
+    imageElement.style.width = '100px'; // Adjust width as needed
+    imageElement.style.margin = '10px';
+    imageContainer.appendChild(imageElement);
+})
+            }catch(error){
+                console.error('Error fetching images:', error);
+            }
+        }
+        fetchImages()
+    </script>
+</body>
+</html>

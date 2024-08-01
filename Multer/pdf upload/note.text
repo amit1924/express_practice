@@ -1,0 +1,43 @@
+User uploads a file named myphoto.jpg via the form field named profilePic.
+
+Destination Function:
+The file will be stored in the uploads/ directory.
+
+
+destination: (req, file, cb) => {
+  cb(null, "uploads/");
+}
+Filename Function:
+The file name will be generated as follows:
+
+file.fieldname is profilePic
+Date.now() is, say, 1625255358954
+path.extname(file.originalname) is .jpg
+So, the final file name will be:
+
+
+profilePic-1625255358954.jpg
+
+////////////////////////////////////////////////////////////////
+for uploading multiple files
+// Endpoint to handle multiple Pdf uploads
+app.post('/upload', upload.array('pdfs', 10), (req, res) => { // 'pdfs' is the field name, 10 is the max count of files
+  const files = req.files;
+  if (!files) {
+    return res.status(400).send('No files uploaded.');
+  }
+
+  const fileMetadata = files.map(file => ({
+    filename: file.filename,
+    path: file.path,
+    originalname: file.originalname,
+  }));
+
+  Pdf.insertMany(fileMetadata, (err, docs) => {
+    if (err) {
+      return res.status(500).send(err);
+    } else {
+      res.status(200).send('Files uploaded successfully');
+    }
+  });
+});

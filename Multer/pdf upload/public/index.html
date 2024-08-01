@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upload pdf</title>
+
+    <style>
+
+        body{
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+
+        }
+        .container{
+          
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+           
+            height: 100vh;
+        }
+#pdf-form{
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    padding: 2rem;
+    background-color:rgb(61, 61, 61);
+}
+
+#pdf-form button{
+    background-color: blueviolet;
+    padding: 1rem;
+    border: 2px solid gray;
+}
+
+#pdf-form button:hover{
+    background-color: rgb(152, 24, 50);
+}
+
+  
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Pdf</h1>
+    <form id="pdf-form" enctype="multipart/form-data">
+    
+        <input type="file" id="pdf-file" name="pdf" />
+        <button type="submit">Upload pdf</button>
+    </form>
+  </div>
+
+  <script>
+    const uploadPdfFile = async (formData) => {
+      try {
+        const response = await fetch("http://localhost:3000/upload", {
+          method: "POST",
+          body: formData,
+        });
+        console.log(response);
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error('Error uploading PDF:', error);
+      }
+    }
+
+    /*const uploadFormPdf = document.getElementById('pdf-form');
+    uploadFormPdf.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pdfFile = document.getElementById('pdf-file').files[0];
+      const formData = new FormData();
+      formData.append('pdf', pdfFile);
+      uploadPdfFile(formData);
+    });*/
+
+    const uploadFormPdf = document.getElementById('pdf-form');
+    uploadFormPdf.addEventListener('submit', (e) => {
+      e.preventDefault(); 
+
+      const formData =new FormData(e.target);
+      uploadPdfFile(formData);
+
+
+    });
+    
+    </script>
+</body>
+</html>
