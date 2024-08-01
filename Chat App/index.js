@@ -126,39 +126,78 @@ function generateRoomId(userId1, userId2) {
 }
 
 ////////////////////////////////////////////////////////////////
+const onlineUsers = {}; // Store userId to username and socketId mapping
+
 io.on("connection", (socket) => {
   console.log("A user connected");
 
+  // Function to retrieve username for a given userId
+  const getUsernameFromUserId = async (userId) => {
+    try {
+      const user = await User.findById(userId);
+      return user ? user.username : null;
+    } catch (err) {
+      console.error("Error fetching username:", err);
+      return null;
+    }
+  };
+
   socket.on("join-room", async (userId, otherUserId) => {
+    const username = await getUsernameFromUserId(userId);
+    if (username) {
+      onlineUsers[userId] = { username, socketId: socket.id };
+    }
+
     const roomId = generateRoomId(userId, otherUserId);
     socket.join(roomId);
-    console.log(`User ${userId} joined room ${roomId}`);
+    console.log(`User ${username} (${userId}) joined room ${roomId}`);
 
-    // Retrieve message history
-    const messages = await Message.find({ roomId }).sort({ timestamp: 1 });
-    socket.emit("loadMessages", messages);
+    io.emit("updateOnlineUsers", onlineUsers);
+    console.log("Online users:", onlineUsers); // Debugging log
 
-    // Create a new message from Client
+    // Load previous messages for the room
+    Message.find({ roomId })
+      .sort({ timestamp: 1 })
+      .then((messages) => {
+        socket.emit("loadMessages", messages);
+      });
+
     socket.on("message", (message) => {
-      const timestamp = new Date(); // Create a Date object
+      const timestamp = new Date();
       Message.create({
         roomId,
         sender: userId,
         content: message,
         timestamp,
-      });
-      io.to(roomId).emit("createMessage", {
-        sender: userId,
-        content: message,
-        timestamp,
+      }).then(() => {
+        io.to(roomId).emit("createMessage", {
+          sender: userId,
+          content: message,
+          timestamp,
+        });
       });
     });
 
     socket.on("disconnect", () => {
-      console.log(`User ${userId} disconnected from room ${roomId}`);
+      // Remove the user from the onlineUsers object
+      for (const [userId, user] of Object.entries(onlineUsers)) {
+        if (user.socketId === socket.id) {
+          delete onlineUsers[userId];
+          console.log(`User ${user.username} (${userId}) disconnected`);
+          break; // Exit the loop once the user is found and removed
+        }
+      }
+
+      io.emit("updateOnlineUsers", onlineUsers);
+      console.log(`User with socket ID ${socket.id} disconnected`);
+      console.log("Online users:", onlineUsers);
     });
   });
 });
+
+function generateRoomId(userId1, userId2) {
+  return [userId1, userId2].sort().join("_");
+}
 
 // Start Server
 server.listen(3000, () => {

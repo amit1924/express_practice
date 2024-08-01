@@ -1,20 +1,18 @@
 <%- include('partials/header', { title: 'Chat' }) %>
-<div class="flex flex-col items-center min-h-screen p-4 bg-black text-white relative ">
-  <div class="absolute top-3 left-0 ">
-     <!-- Add logout button here -->
-     <a href="/logout" class="logout-button bg-red-800 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mb-6 no-underline transition-all duration-300 ease-in-out">Logout</a>
+<div class="flex flex-col items-center min-h-screen p-4 bg-black text-white relative">
+  <div class="absolute top-3 left-0">
+    <!-- Add logout button here -->
+    <a href="/logout" class="logout-button bg-red-800 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mb-6 no-underline transition-all duration-300 ease-in-out">Logout</a>
   </div>
   <h1 class="text-3xl font-bold mb-6">Welcome,</h1>
   <h1 class="text-yellow-800 font-bold text-4xl"><%= user.username %></h1>
-  
- 
 
   <div class="mb-6">
-    <h2 class="text-2xl font-semibold mb-6 text-center">Registered users</h2>
+    <h2 class="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-fuchsia-500 to-cyan-500">Click below to see who is online 👇</h2>
     <ul id="user-list" class="list-none p-0 space-y-2 flex justify-around gap-4 p-4 bg-black shadow-lg border rounded-lg p-2 transparent flex-wrap">
       <% users.forEach(user => { %>
         <li class="">
-          <button class="user-btn bg-blue-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg animate-pulse" data-user-id="<%= user._id %>" data-username="<%= user.username %>">
+          <button class="user-btn text-white font-bold py-2 px-4 rounded-lg animate-pulse" data-user-id="<%= user._id %>" data-username="<%= user.username %>">
             <%= user.username %>
           </button>
         </li>
@@ -41,6 +39,7 @@
   const messageForm = document.getElementById('message-form');
   const messageInput = document.getElementById('message-input');
   const messagesContainer = document.getElementById('messages');
+  const notificationSound = new Audio('./notification.mp3');
 
   let roomId;
   const userId = '<%= user.id %>';
@@ -53,29 +52,48 @@
   function displayMessage({ sender, content, timestamp }) {
     const messageDiv = document.createElement('div');
     const messageContent = document.createElement('div');
-    const messageTimestamp = document.createElement('div');
 
-    // Format the message content
     messageContent.textContent = content;
     messageContent.classList.add('message', 'p-3', 'rounded-lg', 'md:max-w-xs', 'break-words', 'my-2');
     if (sender === userId) {
       messageContent.classList.add('bg-blue-400', 'text-black', 'text-right', 'self-end', 'ml-auto', 'font-bold');
-      // Include timestamp within the message content for sender
       messageContent.innerHTML += `<div class="text-xs text-gray-500 mt-1">${formatTimestamp(timestamp)}</div>`;
     } else {
       messageContent.classList.add('bg-red-200', 'text-black', 'text-left', 'self-start', 'mr-auto', 'font-bold');
-      // Include timestamp within the message content for receiver
       messageContent.innerHTML += `<div class="text-xs text-gray-500 mt-1">${formatTimestamp(timestamp)}</div>`;
     }
 
-    // Append the message content to the message div
     messageDiv.appendChild(messageContent);
-
     messagesContainer.appendChild(messageDiv);
-
-    // Ensure messages scroll to the bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
+  function updateOnlineStatus(onlineUsers) {
+    console.log('Received online users:', onlineUsers); // Debugging log
+  
+    // Create a reverse lookup map for usernames
+    const onlineUsernames = {};
+    for (const [userId, userInfo] of Object.entries(onlineUsers)) {
+      onlineUsernames[userInfo.username] = true;
+    }
+  
+    document.querySelectorAll('.user-btn').forEach(button => {
+      const buttonUsername = button.getAttribute('data-username');
+      console.log(`Updating user ${buttonUsername} status`); // Debugging log
+  
+      if (onlineUsernames[buttonUsername]) {
+        console.log(`User ${buttonUsername} is online`); // Debugging log
+        button.classList.add('bg-green-500');
+        
+      } else {
+        console.log(`User ${buttonUsername} is offline`); // Debugging log
+       
+        button.classList.remove('bg-green-500');
+      
+      }
+    });
+  }
+  
+ 
 
   userList.addEventListener('click', e => {
     if (e.target.classList.contains('user-btn')) {
@@ -90,7 +108,7 @@
   });
 
   socket.on('loadMessages', messages => {
-    messagesContainer.innerHTML = ''; // Clear previous messages
+    messagesContainer.innerHTML = '';
     messages.forEach(message => {
       displayMessage(message);
     });
@@ -99,6 +117,13 @@
   socket.on('createMessage', message => {
     console.log(`Received message: ${message.content}`);
     displayMessage(message);
+    if (message.sender !== userId) {
+      notificationSound.play();
+    }
+  });
+
+  socket.on('updateOnlineUsers', onlineUsers => {
+    updateOnlineStatus(onlineUsers);
   });
 
   messageForm.addEventListener('submit', e => {
@@ -114,10 +139,6 @@
   function generateRoomId(userId1, userId2) {
     return [userId1, userId2].sort().join('_');
   }
-
 </script>
+
 <%- include('partials/footer') %>
-
-
-
-
