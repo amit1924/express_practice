@@ -9,7 +9,7 @@ const app = express();
 
 // Connect database
 const connectDb = async () => {
-  const connect = mongoose.connect("mongodb://localhost:27017/protected-page");
+  const connect = mongoose.connect("mongodb+srv://amish198:Amit1988@cluster0.gos2qpp.mongodb.net/protected-page");
 };
 
 // User Schema  Database
